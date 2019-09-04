@@ -2,14 +2,14 @@ inFastPath = Channel.fromPath( "/home/ubuntu/data/auto_database/add/*.fasta" )
 
 params.specName = "Mycobacterium"
 
-process taxadd {
+process TaxAdd {
     publishDir "/home/ubuntu/data/auto_database/add/edited"
 
     input:
-    file fasta from inFastPath
+    file(fasta) from inFastPath
     
     output:
-    "*.fasta"
+    file("*.fasta") into MashDist
 
     """
     taxadd -i "${fasta}" -o "/home/ubuntu/data/auto_database/add/edited" -t "${params.specName}" 
