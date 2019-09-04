@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+
+import sys
+import os
+import requests
+import re
+import argparse
+
+def get_taxid(taxname):
+    # fetch the json for the taxonomic ID from the ENA
+    response = requests.get('https://www.ebi.ac.uk/ena/data/taxonomy/v1/taxon/scientific-name/{0}'.format(taxname))
+    
+    # if request is successful extract taxID otherwise throw error
+    if response.status_code == 200:
+        data = response.json()
+        taxid = data[0]['taxId']
+    else: 
+        raise ValueError("Taxon not found!")
+    
+    return taxid
+
+def edit_fasta(infasta, outfasta, taxname, **kwargs):
+
+    # get the taxonomic ID
+    taxid = get_taxid(taxname)
+	
+    # edit the headers in each fasta file 
+    with open(infasta) as file:
+         fastData = file.read()
+         fastEdit = re.sub(r"(>.+)",r"\1|kraken:taxid|{0}".format(taxid), fastData)
+         fastFile = outfasta + "/" + taxid + "_" + infasta
+         fastFile = open(fastFile, "w")
+         fastFile.write(fastEdit)
+              
+def main():
+    
+    parser = argparse.ArgumentParser()
+    parser.set_defaults(method = edit_fasta)
+    parser.add_argument("-i", "--input-file", dest="infasta", required=True,
+			help="Path to the input fasta files")
+    parser.add_argument("-o", "--output-file", dest="outfasta", required=True,
+                        help="Path to the output fasta files")
+    parser.add_argument("-t", "--taxon-name", dest="taxname", required=True,
+                        help="Name of the taxon")
+
+    args = parser.parse_args()
+    args.method(**vars(args))
+   
+if __name__ == "__main__":
+    main()
+
