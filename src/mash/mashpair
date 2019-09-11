@@ -1,0 +1,10 @@
+#!/bin/bash
+
+for i in *.msh
+ do
+  for j in *.msh
+   do
+    mash dist $i $j
+  done
+done > mashdist.txt
+
