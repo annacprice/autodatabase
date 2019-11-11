@@ -6,14 +6,25 @@ import math
 
 def buildMatrix():
 
-    df = pd.read_csv('mash.txt', header =None, sep='\t')
+    # read mash results and create array
+    df = pd.read_csv('mash.txt', header=None, sep='\t')
     iniArray = df.to_numpy()
 
+    # calculate number of fastas, and use to split iniArray and create mash matrix
     numFastas = math.sqrt(len(iniArray))    
     colList = np.split(iniArray[:,2], numFastas)   
-
     mashMatrix = np.vstack(colList)
+    
+    # find average distance of each row
+    sumArray = mashMatrix.sum(axis=1)
+    avArray = sumArray/numFastas
+
+    # find filenames and append to average distance
+    filenames = iniArray[0:int(numFastas), 0]
+    fileavArray = np.column_stack((filenames, avArray))
+
+    return fileavArray
 
 if __name__ == "__main__":
 
-    buildMatrix()
+    fileavArray = buildMatrix()
