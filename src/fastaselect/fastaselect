@@ -3,11 +3,12 @@
 import pandas as pd
 import numpy as np
 import math
+import argparse
 
-def buildMatrix():
+def buildMatrix(inMash):
 
     # read mash results and create array
-    df = pd.read_csv('mash.txt', header=None, sep='\t')
+    df = pd.read_csv(inMash, header=None, sep='\t')
     iniArray = df.to_numpy()
 
     # calculate number of fastas, and use to split iniArray and create mash matrix
@@ -25,6 +26,29 @@ def buildMatrix():
 
     return fileavArray
 
+def fastaMove(cleanPath, discardPath, fileavArray):
+
+    # collect clean fastas
+    cleanIndices = np.argwhere(fileavArray[:,1] < 0.003)
+    
+    cleanFasta = []
+    for elem in np.nditer(cleanIndices):
+        cleanFasta.append(fileavArray[elem ,0])
+
 if __name__ == "__main__":
 
-    fileavArray = buildMatrix()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-i", "--input-mash", dest="inMash", required=True,
+                        help="Path to the input mash results")
+    parser.add_argument("-c", "--clean-path", dest="cleanPath", required=True,
+                        help="Path for the clean fasta files")
+    parser.add_argument("-d", "--discard-path", dest="discardPath", required=True,
+                        help="Path for the discarded fasta files")
+
+    args = parser.parse_args()
+    inMash = args.inMash
+    cleanPath = args.cleanPath
+    discardPath = args.discardPath
+
+    fileavArray = buildMatrix(inMash)
+    fastaMove(cleanPath, discardPath, fileavArray)
