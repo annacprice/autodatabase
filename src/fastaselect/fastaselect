@@ -29,7 +29,7 @@ def buildMatrix(inMash):
 def fastaMove(fileavArray):
 
     # collect clean fastas
-    cleanIndices = np.argwhere(fileavArray[:,1] < 0.003)
+    cleanIndices = np.argwhere(fileavArray[:,1] < 0.1)
     
     cleanFasta = []
     for elem in np.nditer(cleanIndices):
@@ -38,12 +38,21 @@ def fastaMove(fileavArray):
     # collect fastas to discard
     discardFasta = np.setdiff1d(fileavArray[:,0], np.asarray(cleanFasta))
 
+    # write to file
+    with open("cleanFasta.txt", "w") as file_out:
+        for elem in cleanFasta:
+            file_out.write("%s\n" % elem)
+
+    with open("discardFasta.txt", "w") as file_out:
+        for elem in list(discardFasta):
+            file_out.write("%s\n" % elem)
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input-mash", dest="inMash", required=True,
                         help="Path to the input mash results")
-
+    
     args = parser.parse_args()
     inMash = args.inMash
 
