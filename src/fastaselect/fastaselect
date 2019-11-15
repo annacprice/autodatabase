@@ -38,7 +38,7 @@ def fastaMove(cleanPath, discardPath, fastaPath, fileavArray):
         cleanFasta.append(fileavArray[elem, 0])
 
     # collect fastas to discard
-    discardFasta = np.setdiff1d(filenames, np.asarray(cleanFasta))
+    discardFasta = np.setdiff1d(fileavArray[:,0], np.asarray(cleanFasta))
 
     # move files to add or discard directory
     for elem in cleanFasta:
