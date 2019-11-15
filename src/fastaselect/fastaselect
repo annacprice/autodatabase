@@ -4,8 +4,6 @@ import pandas as pd
 import numpy as np
 import math
 import argparse
-import os
-import shutil
 
 def buildMatrix(inMash):
 
@@ -28,7 +26,7 @@ def buildMatrix(inMash):
 
     return fileavArray
 
-def fastaMove(cleanPath, discardPath, fastaPath, fileavArray):
+def fastaMove(fileavArray):
 
     # collect clean fastas
     cleanIndices = np.argwhere(fileavArray[:,1] < 0.003)
@@ -40,29 +38,14 @@ def fastaMove(cleanPath, discardPath, fastaPath, fileavArray):
     # collect fastas to discard
     discardFasta = np.setdiff1d(fileavArray[:,0], np.asarray(cleanFasta))
 
-    # move files to add or discard directory
-    for elem in cleanFasta:
-        shutil.move(fastaPath + "/" + elem, cleanPath + "/" + elem)
-    for elem in list(discardFasta):
-        shutil.move(fastaPath + "/" + elem, discardPath + "/" + elem)
-    
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input-mash", dest="inMash", required=True,
                         help="Path to the input mash results")
-    parser.add_argument("-f", "--fasta-path", dest="fastaPath", required=True,
-                        help="Path to the fasta files")
-    parser.add_argument("-c", "--clean-path", dest="cleanPath", required=True,
-                        help="Path to move the clean fasta files to")
-    parser.add_argument("-d", "--discard-path", dest="discardPath", required=True,
-                        help="Path to move the discarded fasta files to")
 
     args = parser.parse_args()
     inMash = args.inMash
-    cleanPath = args.cleanPath
-    discardPath = args.discardPath
-    fastaPath = args.fastaPath
 
     fileavArray = buildMatrix(inMash)
-    fastaMove(cleanPath, discardPath, fastaPath, fileavArray)
+    fastaMove(fileavArray)
