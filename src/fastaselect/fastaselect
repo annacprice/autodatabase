@@ -23,7 +23,7 @@ def buildMatrix(inMash):
     avArray = sumArray/numFastas
 
     # find filenames and append to average distance
-    filenames = iniArray[0:int(numFastas), 0]
+    filenames = iniArray[0:int(numFastas), 1]
     fileavArray = np.column_stack((filenames, avArray))
 
     return fileavArray
