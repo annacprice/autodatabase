@@ -1,32 +1,31 @@
 #!/usr/bin/env nextflow
 
 // path to the input fasta files to add to the database
-inFastPath = Channel.fromPath( "/home/ubuntu/data/auto_database/add/*.fasta" )
-
-// define parameter for the species name
-params.specName = "Mycobacterium"
+InFasta = Channel
+.fromPath( "/home/ubuntu/data/auto_database/add/**.fasta" )
+.map { file -> tuple(file.getParent().getName(), file)}
 
 // add the taxonomic ID to the headers of the fasta files
 process TaxAdd {
-    publishDir "/home/ubuntu/data/auto_database/add/edited", mode: 'copy'
+    publishDir "/home/ubuntu/data/auto_database/edit", mode: 'copy'
 
     cpus 4
 
     input:
-    file(fasta) from inFastPath
-   
+    set val(name), file(fasta) from InFasta
+     
     output:
     file("*.fasta") into OutFasta
 
     script:
     """
-    taxadd -i "${fasta}" -o . -t "${params.specName}" 
+    taxadd -i "${fasta}" -o . -t "${name}"
     """
 }
 
 // create the mash sketch files
 process MashSketch {
-    publishDir "/home/ubuntu/data/auto_database/add/edited", mode: 'copy'    
+    publishDir "/home/ubuntu/data/auto_database/edit", mode: 'copy'    
 
     cpus 4
 
@@ -44,7 +43,7 @@ process MashSketch {
 
 // calculate the mash distances
 process MashDist {
-    publishDir "/home/ubuntu/data/auto_database/add/edited", mode: 'copy'
+    publishDir "/home/ubuntu/data/auto_database/edit", mode: 'copy'
     
     cpus 1
 
@@ -77,9 +76,3 @@ process MashSort {
     fastaselect -i "${mashdist}"
     """
 }
-
-
-
-
-
-

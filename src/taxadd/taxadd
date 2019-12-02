@@ -7,6 +7,10 @@ import re
 import argparse
 
 def get_taxid(taxname):
+	
+    # remove the underscore from taxname
+    taxname = taxname.replace("_", " ")	
+
     # fetch the json for the taxonomic ID from the ENA
     response = requests.get('https://www.ebi.ac.uk/ena/data/taxonomy/v1/taxon/scientific-name/{0}'.format(taxname))
     
