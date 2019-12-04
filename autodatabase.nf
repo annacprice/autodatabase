@@ -1,13 +1,16 @@
 #!/usr/bin/env nextflow
 
 // path to the input fasta files to add to the database
-InFasta = Channel
-.fromPath( "/home/ubuntu/data/auto_database/add/**.fasta" )
-.map { file -> tuple(file.getParent().getName(), file)}
+Channel
+    .fromPath( "/home/ubuntu/data/auto_database/add/**.fasta" )
+    .map { file -> tuple(file.getParent().getName(), file)}
+    .set {InFasta}
 
 // add the taxonomic ID to the headers of the fasta files
 process TaxAdd {
-    publishDir "/home/ubuntu/data/auto_database/edit", mode: 'copy'
+    publishDir "/home/ubuntu/data/auto_database/edit", 
+        mode: 'copy',
+        saveAs: {filename -> "${filename.split("_")[0]}/$filename"}
 
     cpus 4
 
