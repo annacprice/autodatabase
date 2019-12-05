@@ -1,10 +1,15 @@
 #!/bin/bash
 
-for i in *.msh
+ls *.msh | cut -d _ -f 1 | sort | uniq > taxid.txt
+
+while read x
+do
+for i in $x*.msh
  do
-  for j in *.msh
+  for j in $x*.msh
    do
     mash dist $i $j
   done
-done > mashdist.txt
+done > $x.txt
+done < taxid.txt
 
