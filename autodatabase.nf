@@ -2,13 +2,13 @@
 
 // path to the input fasta files to add to the database
 Channel
-    .fromPath( "/home/ubuntu/data/auto_database/add/**.fasta" )
+    .fromPath( "/home/ubuntu/data/auto_database/new/**.fasta" )
     .map { file -> tuple(file.getParent().getName(), file)}
     .set {InFasta}
 
 // add the taxonomic ID to the headers of the fasta files
 process TaxAdd {
-    publishDir "/home/ubuntu/data/auto_database/edit", 
+    publishDir "/home/ubuntu/data/auto_database/add”, 
         mode: 'copy',
         saveAs: {filename -> "${filename.split("_")[0]}/$filename"}
 
@@ -28,7 +28,7 @@ process TaxAdd {
 
 // create the mash sketch files
 process MashSketch {
-    publishDir "/home/ubuntu/data/auto_database/edit",
+    publishDir "/home/ubuntu/data/auto_database/add”,
 	mode: 'copy',
 	saveAs: {filename -> "${filename.split("_")[0]}/mash/$filename"}  
 
@@ -48,7 +48,7 @@ process MashSketch {
 
 // calculate the mash distances
 process MashDist {
-    publishDir "/home/ubuntu/data/auto_database/edit", mode: 'copy'
+    publishDir "/home/ubuntu/data/auto_database/add”, mode: 'copy'
     
     cpus 1
 
@@ -66,7 +66,7 @@ process MashDist {
 
 // build the mash matrix and use to sort fastas into clean and discard groups
 process MashSort {
-    publishDir "/home/ubuntu/data/auto_database/add/edited", mode: 'copy'
+    publishDir "/home/ubuntu/data/auto_database/add", mode: 'copy'
 
     cpus 1
 
