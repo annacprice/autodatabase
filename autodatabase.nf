@@ -28,7 +28,9 @@ process TaxAdd {
 
 // create the mash sketch files
 process MashSketch {
-    publishDir "/home/ubuntu/data/auto_database/edit", mode: 'copy'    
+    publishDir "/home/ubuntu/data/auto_database/edit",
+	mode: 'copy',
+	saveAs: {filename -> "${filename.split("_")[0]}/mash/$filename"}  
 
     cpus 4
 
@@ -40,7 +42,7 @@ process MashSketch {
    
     script:
     """
-    mash sketch -o reference_${editfasta} "${editfasta}"
+    mash sketch "${editfasta}"
     """
 }
 
