@@ -45,39 +45,3 @@ process MashSketch {
     mash sketch "${editfasta}"
     """
 }
-
-// calculate the mash distances
-process MashDist {
-    publishDir "/home/ubuntu/data/auto_database/add”, mode: 'copy'
-    
-    cpus 1
-
-    input:
-    file("*.msh") from MashSketches.collect()
-
-    output:
-    file("*.txt") into MashDistances
- 
-    script:
-    """
-    mashpair
-    """
-}
-
-// build the mash matrix and use to sort fastas into clean and discard groups
-process MashSort {
-    publishDir "/home/ubuntu/data/auto_database/add", mode: 'copy'
-
-    cpus 1
-
-    input:
-    file(mashdist) from MashDistances
- 
-    output:
-    file("*.txt") into FastaMove
-
-    script:
-    """
-    fastaselect -i "${mashdist}"
-    """
-}
