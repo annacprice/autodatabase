@@ -8,7 +8,7 @@ Channel
 
 // add the taxonomic ID to the headers of the fasta files
 process TaxAdd {
-    publishDir "/home/ubuntu/data/auto_database/add”, 
+    publishDir "/home/ubuntu/data/auto_database/add", 
         mode: 'copy',
         saveAs: {filename -> "${filename.split("_")[0]}/$filename"}
 
@@ -28,7 +28,7 @@ process TaxAdd {
 
 // create the mash sketch files
 process MashSketch {
-    publishDir "/home/ubuntu/data/auto_database/add”,
+    publishDir "/home/ubuntu/data/auto_database/add",
 	mode: 'copy',
 	saveAs: {filename -> "${filename.split("_")[0]}/mash/$filename"}  
 
