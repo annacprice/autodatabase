@@ -38,8 +38,10 @@ def fastaMove(fileavArray, tax):
     cleanIndices = np.argwhere(fileavArray[:,1] < 0.1)
     
     cleanFasta = []
-    for elem in np.nditer(cleanIndices):
-        cleanFasta.append(fileavArray[elem, 0])
+    # if cleanIndices is not empty
+    if cleanIndices.size:
+    	for elem in np.nditer(cleanIndices):
+            cleanFasta.append(fileavArray[elem, 0])
 
     # collect fastas to discard
     discardFasta = np.setdiff1d(fileavArray[:,0], np.asarray(cleanFasta))
