@@ -36,25 +36,20 @@ def fastaMove(fileavArray, tax):
 
     # collect clean fastas
     cleanIndices = np.argwhere(fileavArray[:,1] < 0.1)
-    
+   
     cleanFasta = []
     # if cleanIndices is not empty
     if cleanIndices.size:
-    	for elem in np.nditer(cleanIndices):
+        for elem in np.nditer(cleanIndices):
             cleanFasta.append(fileavArray[elem, 0])
 
     # collect fastas to discard
     discardFasta = np.setdiff1d(fileavArray[:,0], np.asarray(cleanFasta))
 
     # write to file
-    cleanList = str(tax[0]) + "_cleanFasta.txt"
+    cleanList = str(tax[0]) + "_clean.txt"
     with open(cleanList, "w") as file_out:
         for elem in cleanFasta:
-            file_out.write("%s\n" % elem)
-
-    discardList = str(tax[0]) + "_discardFasta.txt"
-    with open(discardList, "w") as file_out:
-        for elem in list(discardFasta):
             file_out.write("%s\n" % elem)
     
 if __name__ == "__main__":
