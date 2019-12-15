@@ -64,4 +64,33 @@ process MashSort {
     """
 }
 
+// mark poor quality fastas
+process FastaDiscard {
+    echo true
 
+    publishDir "/home/ubuntu/data/auto_database/add",
+        mode: 'copy',
+        overwrite: 'true',
+        saveAs: {filename -> "${filename.split("_")[0]}/$filename"}
+
+    cpus 4
+
+    input:
+    file(fasta) from JustFasta
+    file("*.txt") from FastaMove.collect()
+
+    output:
+    file("*.fasta") optional true into DiscardFasta
+
+    script:
+    """
+    cat *.txt > discard.txt
+    if grep -Fxq "${fasta}" discard.txt
+    then
+        touch "${fasta}"
+    fi
+    """
+}
+
+discard_dir = file("/home/ubuntu/data/auto_database/discard")
+FastaChange.flatMap().subscribe { it.moveTo(discard_dir) }
