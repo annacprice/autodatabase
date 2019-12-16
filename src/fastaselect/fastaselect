@@ -47,9 +47,9 @@ def fastaMove(fileavArray, tax):
     discardFasta = np.setdiff1d(fileavArray[:,0], np.asarray(cleanFasta))
 
     # write to file
-    cleanList = str(tax[0]) + "_clean.txt"
-    with open(cleanList, "w") as file_out:
-        for elem in cleanFasta:
+    discardList = str(tax[0]) + "_discard.txt"
+    with open(discardList, "w") as file_out:
+        for elem in list(discardFasta):
             file_out.write("%s\n" % elem)
     
 if __name__ == "__main__":
