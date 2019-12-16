@@ -19,9 +19,14 @@ Channel
     .fromPath( "/home/ubuntu/data/auto_database/add/*/*.fasta" )
     .set {JustFasta}
 
+discard_dir = file("/home/ubuntu/data/auto_database/discard")
+
 Channel
-    .watchPath( "/home/ubuntu/data/auto_database/add/*/*.fasta", 'modify' )
+    .watchPath("/home/ubuntu/data/auto_database/add/*/*.fasta", 'modify, create' )
+    .until { file -> file.name == 'fin_pipe.fasta' }
     .set {FastaChange}
+
+FastaChange.subscribe { it.moveTo(discard_dir) }
 
 // calculate the mash distances
 process MashDist {
@@ -69,14 +74,14 @@ process FastaDiscard {
     echo true
 
     publishDir "/home/ubuntu/data/auto_database/add",
-        mode: 'copy',
-        overwrite: 'true',
+        mode: 'move',
+	overwrite: 'true',
         saveAs: {filename -> "${filename.split("_")[0]}/$filename"}
 
-    cpus 4
+    cpus 1
 
     input:
-    file(fasta) from JustFasta
+    file(fa) from JustFasta.collect()
     file("*.txt") from FastaMove.collect()
 
     output:
@@ -85,12 +90,13 @@ process FastaDiscard {
     script:
     """
     cat *.txt > discard.txt
-    if grep -Fxq "${fasta}" discard.txt
+    for x in *.fasta; do
+    if grep -Fxq \$x discard.txt
     then
-        touch "${fasta}"
+	touch \$x
     fi
-    """
+    done
+    touch fin_pipe.fasta
+    """   
 }
 
-discard_dir = file("/home/ubuntu/data/auto_database/discard")
-FastaChange.flatMap().subscribe { it.moveTo(discard_dir) }
