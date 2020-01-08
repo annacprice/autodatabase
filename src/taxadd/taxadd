@@ -5,6 +5,8 @@ import os
 import requests
 import re
 import argparse
+import pandas as pd
+import io
 
 def get_taxid(taxname):
 	
@@ -23,10 +25,30 @@ def get_taxid(taxname):
     
     return taxid
 
+
+def get_taxid_names(taxname):
+
+    # remove underscore from taxname
+    taxname = taxname.replace("_", " ")
+
+    # read names.dmp into dataframe
+    df = pd.read_csv('names.dmp', header=None, sep="|")
+    # strip leading and trailing whitespace from column 2
+    df[1] = df[1].str.strip()
+
+    # find row with species name
+    find_row = df[df[1] == taxname]
+    # return the tax ID
+    taxid = find_row.iloc[0, 0]
+    print (taxid)
+
+    return taxid
+
+
 def edit_fasta(infasta, outfasta, taxname, **kwargs):
 
     # get the taxonomic ID
-    taxid = get_taxid(taxname)
+    taxid = get_taxid_names(taxname)
 	
     # edit the headers in each fasta file 
     with open(infasta) as file:
@@ -41,7 +63,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.set_defaults(method = edit_fasta)
     parser.add_argument("-i", "--input-file", dest="infasta", required=True,
-			help="Path to the input fasta files")
+                        help="Path to the input fasta files")
     parser.add_argument("-o", "--output-file", dest="outfasta", required=True,
                         help="Path to the output fasta files")
     parser.add_argument("-t", "--taxon-name", dest="taxname", required=True,
