@@ -38,9 +38,12 @@ def get_taxid_names(taxname):
 
     # find row with species name
     find_row = df[df[1] == taxname]
-    # return the tax ID
-    taxid = find_row.iloc[0, 0]
-    print (taxid)
+
+    # return the tax ID, throw error if taxon is not found
+    if find_row.empty:
+       raise ValueError("Taxon not found!")
+    else:
+       taxid = find_row.iloc[0, 0]
 
     return taxid
 
@@ -71,7 +74,7 @@ def main():
 
     args = parser.parse_args()
     args.method(**vars(args))
+
    
 if __name__ == "__main__":
     main()
-
