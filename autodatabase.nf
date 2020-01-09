@@ -8,12 +8,22 @@ include './modules/taxadd.nf'
 include './modules/mash.nf'
 
 // define input channels
-Channel
-    .fromPath( "/home/ubuntu/data/auto_database/new/**.fasta" )
-    .map { file -> tuple(file.getParent().getName(), file)}
-    .set {InFasta}
+//InFasta = Channel.fromPath( "/home/ubuntu/data/auto_database/new/**.fasta" ).map { file -> tuple(file.getParent().getName(), file)}
 
+
+// define workflow components
+workflow PrepareNewAssemblies {
+    get:
+      InFasta
+    main:
+      TaxAdd(InFasta)
+      MashSketch(TaxAdd.out)
+}
+
+// main workflow
 workflow {
-    TaxAdd(InFasta)
-    MashSketch(TaxAdd.out)
+    InFasta = Channel.fromPath( "/home/ubuntu/data/auto_database/new/**.fasta" ).map { file -> tuple(file.getParent().getName(), file)}    
+
+    main:
+      PrepareNewAssemblies(InFasta)
 }
