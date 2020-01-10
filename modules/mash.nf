@@ -1,7 +1,4 @@
 process MashSketch {
-    publishDir "/home/ubuntu/data/auto_database/add",
-        mode: 'copy',
-        saveAs: {filename -> "${filename.split("_")[0]}/mash/$filename"}
 
     cpus 4
 
@@ -16,3 +13,36 @@ process MashSketch {
     mash sketch "${fasta}"
     """
 }
+
+process MashDist {
+ 
+    cpus 1
+
+    input:
+    file(mash)
+
+    output:
+    file("*_mashdist.txt")
+
+    script:
+    """
+    mashpair
+    """
+}
+
+process MashSort {
+
+    cpus 2
+
+    input:
+    file(mashdist)
+
+    output:
+    file("*.txt")
+
+    script:
+    """
+    fastaselect -i "${mashdist}"
+    """
+} 
+   

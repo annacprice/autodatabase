@@ -7,10 +7,6 @@ nextflow.preview.dsl=2
 include './modules/taxadd.nf'
 include './modules/mash.nf'
 
-// define input channels
-//InFasta = Channel.fromPath( "/home/ubuntu/data/auto_database/new/**.fasta" ).map { file -> tuple(file.getParent().getName(), file)}
-
-
 // define workflow components
 workflow PrepareNewAssemblies {
     get:
@@ -18,12 +14,25 @@ workflow PrepareNewAssemblies {
     main:
       TaxAdd(InFasta)
       MashSketch(TaxAdd.out)
+    emit:
+      MashSketch.out
+}
+
+workflow SelectFastas {
+    get:
+      MashSketches
+    main:
+      MashDist(MashSketches.collect())
+      MashSort(MashDist.out.flatten())
 }
 
 // main workflow
 workflow {
-    InFasta = Channel.fromPath( "/home/ubuntu/data/auto_database/new/**.fasta" ).map { file -> tuple(file.getParent().getName(), file)}    
+    InFasta = Channel.fromPath( "/home/ubuntu/data/auto_database/new/**.fasta" ).map { file -> tuple(file.getParent().getName(), file)} 
+    OldMashSketches = Channel.fromPath( "/home/ubuntu/data/auto_database/current/mash/*.msh" )   
 
     main:
       PrepareNewAssemblies(InFasta)
+      SelectFastas(PrepareNewAssemblies.out.mix(OldMashSketches))
 }
+
