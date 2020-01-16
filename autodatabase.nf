@@ -6,17 +6,14 @@ nextflow.preview.dsl=2
 //  import modules
 include './modules/taxadd.nf'
 include './modules/mash.nf'
-
-// define input channels
-//InFasta = Channel.fromPath( "/home/ubuntu/data/auto_database/new/**.fasta" ).map { file -> tuple(file.getParent().getName(), file)}
-
+include './modules/fastaadd.nf'
 
 // define workflow components
 workflow PrepareNewAssemblies {
     get:
-      InFasta
+      EditFasta
     main:
-      TaxAdd(InFasta)
+      TaxAdd(EditFasta)
       MashSketch(TaxAdd.out)
     emit:
       NewFasta = TaxAdd.out
@@ -26,19 +23,29 @@ workflow PrepareNewAssemblies {
 workflow SelectFastas {
     get:
       MashSketches
+      AllFasta
     main:
       MashDist(MashSketches.collect())
       MashSort(MashDist.out.flatten())
+      FastaAdd(AllFasta.collect(), MashSort.out.collect())
+    emit:
+      MashDistances = MashDist.out
+      FastaSelect = MashSort.out
+      FastaToAdd = FastaAdd.out
 }
 
 
 // main workflow
 workflow {
-    InFasta = Channel.fromPath( "/home/ubuntu/data/auto_database/new/**.fasta" ).map { file -> tuple(file.getParent().getName(), file)} 
+    EditFasta = Channel.fromPath( "/home/ubuntu/data/auto_database/new/**.fasta" ).map { file -> tuple(file.getParent().getName(), file)} 
     OldMashSketches = Channel.fromPath( "/home/ubuntu/data/auto_database/current/mash/*.msh" )
-    OldFasta = Channel.fromPath( "/home/ubuntu/data/auto_database/current/**.fasta" )  
+    OldFasta = Channel.fromPath( "/home/ubuntu/data/auto_database/current/*.fasta" )  
 
     main:
-      PrepareNewAssemblies(InFasta)
-      SelectFastas(PrepareNewAssemblies.out.NewMashSketches.mix(OldMashSketches))
+      PrepareNewAssemblies(EditFasta)
+      SelectFastas(PrepareNewAssemblies.out.NewMashSketches.mix(OldMashSketches), PrepareNewAssemblies.out.NewFasta.mix(OldFasta))
+  
+    publish:
+      PrepareNewAssemblies.out to: "/home/ubuntu/data/auto_database/debug"
+      SelectFastas.out to: "/home/ubuntu/data/auto_database/debug"
 }
