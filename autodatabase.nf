@@ -7,6 +7,7 @@ nextflow.preview.dsl=2
 include './modules/taxadd.nf'
 include './modules/mash.nf'
 include './modules/fastaadd.nf'
+include './modules/kraken2.nf'
 
 // define workflow components
 workflow PrepareNewAssemblies {
@@ -34,6 +35,14 @@ workflow SelectFastas {
       FastaToAdd = FastaAdd.out
 }
 
+workflow KrakenBuild {
+    get:
+      FastaAdd
+    main:
+      KrakenAdd(FastaAdd.flatten())
+    emit:
+      KrakenLib = KrakenAdd.out
+}
 
 // main workflow
 workflow {
@@ -44,8 +53,10 @@ workflow {
     main:
       PrepareNewAssemblies(EditFasta)
       SelectFastas(PrepareNewAssemblies.out.NewMashSketches.mix(OldMashSketches), PrepareNewAssemblies.out.NewFasta.mix(OldFasta))
-  
+      KrakenBuild(SelectFastas.out.FastaToAdd)
+
     publish:
       PrepareNewAssemblies.out to: "/home/ubuntu/data/auto_database/debug"
       SelectFastas.out to: "/home/ubuntu/data/auto_database/debug"
+      KrakenBuild.out to: "/home/ubuntu/data/auto_database/debug"
 }
