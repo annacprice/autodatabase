@@ -1,5 +1,5 @@
 process MashSketch {
-
+   
     cpus 4
 
     input:
@@ -15,7 +15,8 @@ process MashSketch {
 }
 
 process MashDist {
- 
+    echo true
+
     cpus 1
 
     input:
@@ -26,7 +27,18 @@ process MashDist {
 
     script:
     """
-    mashpair
+    ls *.msh | cut -d _ -f 1 | sort | uniq > taxid.txt
+
+    while read x
+    do
+    for i in \$x*.msh
+     do
+      for j in \$x*.msh
+       do
+        mash dist \$i \$j
+       done
+     done > "\$x"_mashdist.txt
+    done < taxid.txt
     """
 }
 
@@ -44,5 +56,4 @@ process MashSort {
     """
     fastaselect -i "${mashdist}"
     """
-} 
-   
+}    
