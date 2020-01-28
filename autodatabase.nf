@@ -35,22 +35,13 @@ workflow SelectFastas {
       FastaToAdd = FastaAdd.out
 }
 
-workflow KrakenPrep {
+workflow KrakenBuilder {
     get:
       FastaAdd
     main:
       KrakenAdd(FastaAdd.collect())
     emit:
-      KrakenLib = KrakenAdd.out
-}
-
-workflow KrakenBuilder {
-    get:
-      Database
-    main:
-      KrakenBuildData(Database.collect())
-    emit:
-      KrakenDatabase = KrakenBuildData.out
+      KrakenDatabase = KrakenAdd.out
 }
 
 // main workflow
@@ -60,12 +51,9 @@ workflow {
     // Mash Sketches and Fastas from Current Database 
     OldMashSketches = Channel.fromPath( "/home/ubuntu/data/auto_database/current/mash/*.msh" )
     OldFasta = Channel.fromPath( "/home/ubuntu/data/auto_database/current/*.fasta" )
-    // Path for the new database 
-    Database = Channel.fromPath( "/home/ubuntu/data/auto_database/database", type: 'dir')  
-
+     
     main:
       PrepareNewAssemblies(EditFasta)
       SelectFastas(PrepareNewAssemblies.out.NewMashSketches.mix(OldMashSketches), PrepareNewAssemblies.out.NewFasta.mix(OldFasta))
-      KrakenPrep(SelectFastas.out.FastaToAdd)
-      KrakenBuilder(Database)
+      KrakenBuilder(SelectFastas.out.FastaToAdd)
 }
