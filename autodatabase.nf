@@ -8,6 +8,11 @@ include './modules/mash.nf'
 include './modules/kraken2.nf'
 include './modules/autodatabase.nf'
 
+// define input parameters, e.g. path to new assemblies, current database
+params.addFasta = "/home/ubuntu/data/auto_database/new"
+params.currentDatabase = "/home/ubuntu/data/autodatabase/current"
+
+
 // define workflow components
 
 // add taxon to header and calculate mash sketches for new fastas
@@ -50,10 +55,10 @@ workflow KrakenBuilder {
 // main workflow
 workflow {
     // Fastas to Edit
-    EditFasta = Channel.fromPath( "/home/ubuntu/data/auto_database/new/**.fasta" ).map { file -> tuple(file.getParent().getName(), file)}
+    EditFasta = Channel.fromPath( params.addFasta + "/**.fasta" ).map { file -> tuple(file.getParent().getName(), file)}
     // Mash Sketches and Fastas from Current Database 
-    OldMashSketches = Channel.fromPath( "/home/ubuntu/data/auto_database/current/mash/*.msh" )
-    OldFasta = Channel.fromPath( "/home/ubuntu/data/auto_database/current/*.fasta" )
+    OldMashSketches = Channel.fromPath( params.currentDatabase + "/mash/*.msh" )
+    OldFasta = Channel.fromPath( params.currentDatabase + "/*.fasta" )
      
     main:
       PrepareNewFasta(EditFasta)
