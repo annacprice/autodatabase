@@ -1,4 +1,5 @@
-process KrakenAdd {
+// build kraken2 database using october 2018 taxonomy
+process kraken2_databasebuild {
     publishDir "/home/ubuntu/data/auto_database/database", mode: 'copy'
 
     cpus 4
@@ -17,7 +18,7 @@ process KrakenAdd {
     mv names.dmp nodes.dmp taxonomy
 
     for file in *.fasta; do
-    kraken2-build --add-to-library \$file --db .
+       kraken2-build --add-to-library \$file --db .
     done
 
     kraken2-build --build --threads ${task.cpus} --db .
