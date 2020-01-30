@@ -10,8 +10,8 @@ include './modules/autodatabase.nf'
 
 // define input parameters, e.g. path to new assemblies, current database
 params.addFasta = "/home/ubuntu/data/auto_database/new"
-params.currentDatabase = "/home/ubuntu/data/autodatabase/current"
-
+params.currentDatabase = "/home/ubuntu/data/auto_database/current"
+params.newDatabase = "/home/ubuntu/data/auto_database/database"
 
 // define workflow components
 
@@ -64,4 +64,6 @@ workflow {
       PrepareNewFasta(EditFasta)
       SelectFasta(PrepareNewFasta.out.NewMashSketches.mix(OldMashSketches), PrepareNewFasta.out.NewFasta.mix(OldFasta))
       KrakenBuilder(SelectFasta.out.FastaToAdd)
+    publish:
+      KrakenBuilder.out to: params.newDatabase, mode: 'copy'
 }

@@ -1,7 +1,6 @@
 // build kraken2 database using october 2018 taxonomy
 process kraken2_databasebuild {
-    publishDir "/home/ubuntu/data/auto_database/database", mode: 'copy'
-
+   
     cpus 4
 
     input:
