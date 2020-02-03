@@ -73,7 +73,7 @@ workflow {
        SelectFasta(PrepareNewFasta.out.NewMashSketches.mix(OldMashSketches), PrepareNewFasta.out.NewFasta.mix(OldFasta))
        KrakenBuilder(SelectFasta.out.FastaToAdd)
      publish:
-       SelectFasta.out to: params.newDatabase, mode: 'copy'
-       KrakenBuilder.out to: params.newDatabase, mode: 'copy'    
+       SelectFasta.out to: params.newDatabase, mode: 'copy', overwrite: true
+       KrakenBuilder.out to: params.newDatabase, mode: 'copy', overwrite: true    
 }
 
