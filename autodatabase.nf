@@ -10,7 +10,8 @@ include './modules/autodatabase.nf'
 
 // define input parameters, e.g. path to new assemblies, current database
 params.addFasta = "/home/ubuntu/data/auto_database/new"
-params.currentDatabase = "/home/ubuntu/data/auto_database/current"
+//params.currentDatabase = "/home/ubuntu/data/auto_database/current"
+params.currentDatabase = null
 params.newDatabase = "/home/ubuntu/data/auto_database/database"
 
 // define workflow components
@@ -53,17 +54,25 @@ workflow KrakenBuilder {
 }
 
 // main workflow
+
 workflow {
     // Fastas to Edit
     EditFasta = Channel.fromPath( params.addFasta + "/**.fasta" ).map { file -> tuple(file.getParent().getName(), file)}
-    // Mash Sketches and Fastas from Current Database 
-    OldMashSketches = Channel.fromPath( params.currentDatabase + "/mash/*.msh" )
-    OldFasta = Channel.fromPath( params.currentDatabase + "/*.fasta" )
-     
-    main:
-      PrepareNewFasta(EditFasta)
-      SelectFasta(PrepareNewFasta.out.NewMashSketches.mix(OldMashSketches), PrepareNewFasta.out.NewFasta.mix(OldFasta))
-      KrakenBuilder(SelectFasta.out.FastaToAdd)
-    publish:
-      KrakenBuilder.out to: params.newDatabase, mode: 'copy'
+
+    if( params.currentDatabase ) {
+        // Mash Sketches and Fastas from Current Database 
+        OldMashSketches = Channel.fromPath( params.currentDatabase + "/mash/*.msh" )
+        OldFasta = Channel.fromPath( params.currentDatabase + "/*.fasta" ) 
+    }
+    else {
+        OldMashSketches = Channel.empty()
+        OldFasta = Channel.empty()
+    }
+     main:
+       PrepareNewFasta(EditFasta)
+       SelectFasta(PrepareNewFasta.out.NewMashSketches.mix(OldMashSketches), PrepareNewFasta.out.NewFasta.mix(OldFasta))
+       KrakenBuilder(SelectFasta.out.FastaToAdd)
+     publish:
+       KrakenBuilder.out to: params.newDatabase, mode: 'copy'    
 }
+
