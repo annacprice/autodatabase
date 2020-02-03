@@ -67,17 +67,19 @@ process autodatabase_selectfasta {
     file(mash)
 
     output:
-    path "*.fasta" optional true
-    path "*.msh" optional true
+    path "assemblies/*.fasta" optional true
+    path "mash/*.msh" optional true
 
     script:
     """
+    mkdir assemblies
+    mkdir mash
     cat *.txt > clean.txt
     for x in *.fasta; do
     if grep -Fxq \$x clean.txt
     then
-        mv \$x add\$x
-        mv \$x.msh add\$x.msh     
+        mv \$x assemblies/
+        mv \$x.msh mash/   
     fi
     done    
     """
