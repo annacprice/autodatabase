@@ -16,6 +16,8 @@ process autodatabase_addtaxon {
 // create mash output txt file for each taxon with pairwise distances
 process autodatabase_mashdist {
 
+    echo true
+
     input:
     file(mash)
 
@@ -57,22 +59,25 @@ process autodatabase_qc {
 // create channel for the high quality assemblies
 process autodatabase_selectfasta {
 
+    echo true
+
     input:
     file(fasta)
     file(txt)
+    file(mash)
 
     output:
-    path "add*.fasta" optional true
+    path "*.fasta" optional true
+    path "*.msh" optional true
 
     script:
     """
-    ls *.txt | xargs echo
     cat *.txt > clean.txt
     for x in *.fasta; do
     if grep -Fxq \$x clean.txt
     then
-        echo \$x
         mv \$x add\$x
+        mv \$x.msh add\$x.msh     
     fi
     done    
     """
