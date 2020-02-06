@@ -5,7 +5,7 @@ process autodatabase_addtaxon {
     tuple(val(name), file(fasta))
 
     output:
-    file("*.fasta")
+    file("*.f*")
 
     script:
     """
@@ -13,33 +13,22 @@ process autodatabase_addtaxon {
     """
 }
 
-// create mash output txt file for each taxon with pairwise distances
-process autodatabase_mashdist {
-
-    echo true
-
+// create mash distance matrix per taxon
+process autodatabase_mash {
+    
     input:
-    file(mash)
+    tuple(val(tax), file(fasta))
 
     output:
     file("*_mashdist.txt")
 
     script:
     """
-    ls *.msh | cut -d _ -f 1 | sort | uniq > taxid.txt
-
-    while read x
-    do
-    for i in \$x*.msh
-     do
-      for j in \$x*.msh
-       do
-        mash dist \$i \$j
-       done
-     done > "\$x"_mashdist.txt
-    done < taxid.txt
+    mash sketch -o ref *.f*
+    mash dist ref.msh ref.msh > ${tax}_mashdist.txt
     """
 }
+
 
 // build distance matrix and output txt file with list of high quality assemblies 
 process autodatabase_qc {
@@ -64,22 +53,20 @@ process autodatabase_selectfasta {
     input:
     file(fasta)
     file(txt)
-    file(mash)
-
+    
     output:
-    path "assemblies/*.fasta" optional true
-    path "mash/*.msh" optional true
-
+    path "assemblies/*.f*" optional true
+   
     script:
     """
+    ls *.txt | xargs echo
+    ls *.f* | xargs echo
     mkdir assemblies
-    mkdir mash
     cat *.txt > clean.txt
-    for x in *.fasta; do
+    for x in *.f*; do
     if grep -Fxq \$x clean.txt
     then
-        mv \$x assemblies/
-        mv \$x.msh mash/   
+        mv \$x assemblies/   
     fi
     done    
     """
