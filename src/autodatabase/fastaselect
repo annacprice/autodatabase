@@ -23,12 +23,16 @@ def buildMatrix(inMash):
     avArray = sumArray/numFastas
 
     # find filenames and append to average distance
-    filenames = iniArray[0:int(numFastas), 1]
+    filenames = iniArray[0:int(numFastas), 0]
+    fileArray = np.column_stack((filenames, mashMatrix, avArray))
     fileavArray = np.column_stack((filenames, avArray))
 
     # get tax ID
     regex = re.compile(r'\d+')
     tax = regex.findall(str(inMash))
+
+    mashList = str(tax[0]) + "_mash.txt"
+    np.savetxt(mashList, fileArray, delimiter=" ", fmt="%s")
 
     return fileavArray, tax
 
