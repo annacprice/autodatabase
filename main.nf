@@ -14,7 +14,7 @@ params.currentDatabase = null
 params.newDatabase = "/home/ubuntu/data/auto_database/databasetest"
 
 // define workflow components
-// add taxon to header and calculate mash sketches for new fastas
+// add taxon to header and filename and for new fastas
 workflow PrepareNewFasta {
     get:
       EditFasta
@@ -24,17 +24,16 @@ workflow PrepareNewFasta {
       NewFasta = autodatabase_addtaxon.out
 }
 
-// calculate pairwise distance matrix and use to select high quality assemblies
+// calculate pairwise distance matrix and use to select high quality assemblies; parallelisation is by taxon
 workflow SelectFasta {
     get:
       AllFasta
     main:
       autodatabase_mash(AllFasta)
       autodatabase_qc(autodatabase_mash.out)
-      autodatabase_selectfasta(AllFasta.flatten().collect(), autodatabase_qc.out.collect())
+      autodatabase_selectfasta(AllFasta, autodatabase_qc.out.collect().flatten().map{ file -> tuple(file.getName().split("_")[0], file) }.groupTuple(sort: true))
     emit:
-      FastaToAdd = autodatabase_selectfasta.out[0]
-      MashToAdd = autodatabase_selectfasta.out[1]
+      FastaToAdd = autodatabase_selectfasta.out
 }
 
 // build kraken2 database
@@ -54,17 +53,17 @@ workflow {
     EditFasta = Channel.fromPath( params.addFasta + "/**.f*" ).map { file -> tuple(file.getParent().getName(), file)}
 
     if( params.currentDatabase ) {
-        // If building from a previous database, create channnels for the assemblies
+        // If building from a previous database, create channnel for the assemblies
         OldFasta = Channel.fromPath( params.currentDatabase + "/**.f*" ) 
     }
     else {
-        // Else there are no assemblies to add so create empty channels
+        // Else there are no assemblies to add so create empty channel
         OldFasta = Channel.empty()
     }
 
      main:
        PrepareNewFasta(EditFasta)
-       AllFasta = PrepareNewFasta.out.NewFasta.mix(OldFasta).map{ file -> tuple(file.getName().split("_")[0], file) }.groupTuple()
+       AllFasta = PrepareNewFasta.out.NewFasta.mix(OldFasta).map{ file -> tuple(file.getName().split("_")[0], file) }.groupTuple(sort: true)
        SelectFasta(AllFasta)
        KrakenBuilder(SelectFasta.out.FastaToAdd)
      publish:

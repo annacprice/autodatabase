@@ -51,8 +51,8 @@ process autodatabase_selectfasta {
     echo true
 
     input:
-    file(fasta)
-    file(txt)
+    tuple(val(tax), file(fasta))
+    tuple(val(tax), file(txt))
     
     output:
     path "assemblies/*.f*" optional true
