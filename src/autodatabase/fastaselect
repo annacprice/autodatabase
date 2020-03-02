@@ -6,12 +6,17 @@ import math
 import argparse
 import os
 import re
+from scipy.stats import mode
 
 def buildMatrix(inMash):
 
     # read mash results and create array
     df = pd.read_csv(inMash, header=None, sep='\t')
     iniArray = df.to_numpy()
+
+    # get tax ID
+    regex = re.compile(r'\d+')
+    tax = regex.findall(str(inMash))
 
     # calculate number of fastas, and use to split iniArray and create mash matrix
     numFastas = math.sqrt(len(iniArray))    
@@ -21,34 +26,52 @@ def buildMatrix(inMash):
     # find average distance of each row
     sumArray = mashMatrix.sum(axis=1)
     avArray = sumArray/numFastas
+    
+    # if there are less than four samples in taxon then wrie error file then exit
+    if len(avArray) < 4:
+        taxon2small = str(tax[0]) + "_error.txt"
+        with open(taxon2small, "w") as file_out:
+            file_out.write("Taxon needs at least 4 samples to be added to database.")
+        exit()
+
+    # round avArray to 2 s.f
+    rdArray =[]
+    for elem in avArray:
+        elemrd = round(elem, -int(np.floor(np.sign(elem) * np.log10(abs(elem)))) + 2)
+        rdArray.append(elemrd)
+
+    q1 = np.percentile(avArray, 25)
+    q3 = np.percentile(avArray, 75)
+    IQR = q3 - q1
+   
+    modeArray = mode(rdArray)
+    modeVal = modeArray[0]
 
     # find filenames and append to average distance
     filenames = iniArray[0:int(numFastas), 0]
     fileArray = np.column_stack((filenames, mashMatrix, avArray))
     fileavArray = np.column_stack((filenames, avArray))
-
-    # get tax ID
-    regex = re.compile(r'\d+')
-    tax = regex.findall(str(inMash))
-
+   
     mashList = str(tax[0]) + "_mash.txt"
     np.savetxt(mashList, fileArray, delimiter=" ", fmt="%s")
 
-    return fileavArray, tax
+    return fileavArray, tax, modeVal
 
-def fastaMove(fileavArray, tax):
+def fastaMove(fileavArray, tax, modeVal):
 
+    # get 10% range around the mode
+    tenpercent = 0.1 * modeVal
+    low = modeVal - tenpercent
+    high = modeVal + tenpercent
+    
     # collect clean fastas
-    cleanIndices = np.argwhere(fileavArray[:,1] < 0.1)
+    cleanIndices = np.argwhere((fileavArray[:,1] >= low) & (fileavArray[:,1] <= high))
    
     cleanFasta = []
     # if cleanIndices is not empty
     if cleanIndices.size:
         for elem in np.nditer(cleanIndices):
             cleanFasta.append(fileavArray[elem, 0])
-
-    # collect fastas to discard
-    discardFasta = np.setdiff1d(fileavArray[:,0], np.asarray(cleanFasta))
 
     # write to file
     cleanList = str(tax[0]) + "_clean.txt"
@@ -65,5 +88,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
     inMash = args.inMash
 
-    fileavArray, tax = buildMatrix(inMash)
-    fastaMove(fileavArray, tax)
+    fileavArray, tax, modeVal = buildMatrix(inMash)
+    fastaMove(fileavArray, tax, modeVal)
