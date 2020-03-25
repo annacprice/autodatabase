@@ -25,7 +25,7 @@ workflow PrepareNewFasta {
 
 // calculate pairwise distance matrix and use to select high quality assemblies; parallelisation is by taxon
 workflow SelectFasta {
-    get:
+    take:
       AllFasta
     main:
       autodatabase_mash(AllFasta)
@@ -37,7 +37,7 @@ workflow SelectFasta {
 
 // build kraken2 database
 workflow KrakenBuilder {
-    get:
+    take:
       FastaToAdd
     main:
       kraken2_databasebuild(FastaToAdd.collect())
