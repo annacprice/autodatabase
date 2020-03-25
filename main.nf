@@ -4,7 +4,6 @@
 nextflow.preview.dsl=2
 
 //  import modules
-include './modules/kraken2.nf'
 include './modules/autodatabase.nf'
 
 // define input parameters, e.g. path to new assemblies to be added, path to the current database
