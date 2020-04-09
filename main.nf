@@ -63,10 +63,6 @@ workflow {
        PrepareNewFasta(EditFasta)
        AllFasta = PrepareNewFasta.out.NewFasta.mix(OldFasta).map{ file -> tuple(file.getName().split("_")[0], file) }.groupTuple(sort: true)
        SelectFasta(AllFasta)
-       KrakenBuilder(SelectFasta.out.FastaToAdd)
-
-     publish:
-       SelectFasta.out to: params.newDatabase, mode: 'copy', overwrite: true
-       KrakenBuilder.out to: params.newDatabase, mode: 'copy', overwrite: true    
+       KrakenBuilder(SelectFasta.out.FastaToAdd)  
 }
 

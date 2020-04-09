@@ -6,6 +6,8 @@ process autoDatabase_addTaxon {
     * @operator none
     */
    
+    publishDir "${params.newDatabase}/${task.process.replaceAll(":", "_")}", pattern: '*.f*', mode: 'copy'
+
     input:
     tuple val(speciesname), path(fasta)
 
@@ -26,6 +28,8 @@ process autoDatabase_mash {
     * @operator .map{ file -> tuple(file.getName().split("_")[0], file) }.groupTuple(sort: true)
     */
     
+    publishDir "${params.newDatabase}/${task.process.replaceAll(":", "_")}", pattern: '*_mashdist.txt', mode: 'copy'
+
     input:
     tuple val(taxid), path(fasta)
 
@@ -47,6 +51,8 @@ process autoDatabase_qc {
     * @operator .map{ file -> tuple(file.getName().split("_")[0], file) }.groupTuple(sort: true)
     */
 
+    publishDir "${params.newDatabase}/${task.process.replaceAll(":", "_")}", pattern: '*.txt', mode: 'copy'
+
     input:
     path(mashdist)
 
@@ -67,6 +73,8 @@ process autoDatabase_selectFasta {
     * @operator .collect().flatten().map{ file -> tuple(file.getName().split("_")[0], file) }.groupTuple(sort: true)
     */
 
+    publishDir "${params.newDatabase}/${task.process.replaceAll(":", "_")}", pattern: 'assemblies/*.f*', mode: 'copy'
+
     echo true
 
     input:
@@ -78,6 +86,9 @@ process autoDatabase_selectFasta {
    
     script:
     """
+    ls *.txt | xargs echo
+    ls *.f* | xargs echo
+
     mkdir assemblies
 
     cat *.txt > clean.txt
@@ -98,6 +109,8 @@ process autoDatabase_kraken2Build {
     * @output path("*.k2d")
     * @operator .collect()
     */
+
+    publishDir "${params.newDatabase}/${task.process.replaceAll(":", "_")}", pattern: '*.k2d', mode: 'copy'
 
     cpus 4
 
