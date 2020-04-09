@@ -10,11 +10,6 @@ include {autoDatabase_qc} from './modules/autoDatabase.nf' params(params)
 include {autoDatabase_selectFasta} from './modules/autoDatabase.nf' params(params)
 include {autoDatabase_kraken2Build} from './modules/autoDatabase.nf' params(params)
 
-// define input parameters, e.g. path to new assemblies to be added, path to the current database
-params.addFasta = "/home/ubuntu/data/auto_database/new"
-//params.currentDatabase = "/home/ubuntu/data/auto_database/current"
-params.currentDatabase = null
-params.newDatabase = "/home/ubuntu/data/auto_database/databasetest"
 
 // define workflow components
 // add taxon to header and filename and for new assemblies
