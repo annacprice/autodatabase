@@ -4,7 +4,11 @@
 nextflow.preview.dsl=2
 
 //  import modules
-include './modules/autodatabase.nf'
+include {autoDatabase_addTaxon} from './modules/autoDatabase.nf' params(params)
+include {autoDatabase_mash} from './modules/autoDatabase.nf' params(params)
+include {autoDatabase_qc} from './modules/autoDatabase.nf' params(params)
+include {autoDatabase_selectFasta} from './modules/autoDatabase.nf' params(params)
+include {autoDatabase_kraken2Build} from './modules/autoDatabase.nf' params(params)
 
 // define input parameters, e.g. path to new assemblies to be added, path to the current database
 params.addFasta = "/home/ubuntu/data/auto_database/new"
@@ -13,14 +17,14 @@ params.currentDatabase = null
 params.newDatabase = "/home/ubuntu/data/auto_database/databasetest"
 
 // define workflow components
-// add taxon to header and filename and for new fastas
+// add taxon to header and filename and for new assemblies
 workflow PrepareNewFasta {
-    get:
+    take:
       EditFasta
     main:
-      autodatabase_addtaxon(EditFasta)
+      autoDatabase_addTaxon(EditFasta)
     emit:
-      NewFasta = autodatabase_addtaxon.out
+      NewFasta = autoDatabase_addTaxon.out
 }
 
 // calculate pairwise distance matrix and use to select high quality assemblies; parallelisation is by taxon
@@ -28,11 +32,11 @@ workflow SelectFasta {
     take:
       AllFasta
     main:
-      autodatabase_mash(AllFasta)
-      autodatabase_qc(autodatabase_mash.out)
-      autodatabase_selectfasta(AllFasta, autodatabase_qc.out.collect().flatten().map{ file -> tuple(file.getName().split("_")[0], file) }.groupTuple(sort: true))
+      autoDatabase_mash(AllFasta)
+      autoDatabase_qc(autoDatabase_mash.out)
+      autoDatabase_selectFasta(AllFasta, autoDatabase_qc.out.collect().flatten().map{ file -> tuple(file.getName().split("_")[0], file) }.groupTuple(sort: true))
     emit:
-      FastaToAdd = autodatabase_selectfasta.out
+      FastaToAdd = autoDatabase_selectFasta.out
 }
 
 // build kraken2 database
@@ -40,13 +44,13 @@ workflow KrakenBuilder {
     take:
       FastaToAdd
     main:
-      kraken2_databasebuild(FastaToAdd.collect())
+      autoDatabase_kraken2Build(FastaToAdd.collect())
     emit:
-      KrakenDatabase = kraken2_databasebuild.out
+      KrakenDatabase = autoDatabase_kraken2Build.out
 }
 
-// main workflow
 
+// main workflow
 workflow {
     // New Assemblies to Edit
     EditFasta = Channel.fromPath( params.addFasta + "/**.f*" ).map { file -> tuple(file.getParent().getName(), file)}
@@ -65,6 +69,7 @@ workflow {
        AllFasta = PrepareNewFasta.out.NewFasta.mix(OldFasta).map{ file -> tuple(file.getName().split("_")[0], file) }.groupTuple(sort: true)
        SelectFasta(AllFasta)
        KrakenBuilder(SelectFasta.out.FastaToAdd)
+
      publish:
        SelectFasta.out to: params.newDatabase, mode: 'copy', overwrite: true
        KrakenBuilder.out to: params.newDatabase, mode: 'copy', overwrite: true    
