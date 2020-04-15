@@ -1,21 +1,19 @@
-FROM ubuntu:16.04
+FROM debian:buster
 
-ENV PACKAGES="\
-gcc \
-g++ \
-wget \
-build-essential \
-rsync \
-unzip \
-ncbi-blast+ \
-"
+ENV pengu_software_version_kraken2=2.0.8
 
-RUN apt-get update && apt-get install -y $PACKAGES \
-&& wget 'https://github.com/DerrickWood/kraken2/archive/v2.0.8-beta.tar.gz' \
-&& tar -xf v2.0.8-beta.tar.gz \
-&& rm -r v2.0.8-beta.tar.gz \
-&& cd kraken2-2.0.8-beta \
+RUN apt-get update && apt-get install -y gcc g++ wget build-essential rsync unzip ncbi-blast+ \
+&& wget https://github.com/DerrickWood/kraken2/archive/v${pengu_software_version_kraken2}-beta.tar.gz \
+&& tar -xzf v${pengu_software_version_kraken2}-beta.tar.gz \
+&& rm v${pengu_software_version_kraken2}-beta.tar.gz \
+&& cd kraken2-${pengu_software_version_kraken2}-beta \
 && ./install_kraken2.sh /usr/local/bin
 
-CMD ["/bin/bash"]
+### Software Versions ###
+
+RUN env | grep "pengu_software_version" | sed 's/pengu_software_version_//g' > /etc/pengu_software_version.txt
+
+RUN if [ -d "/.singularity.d/env" ] ; \
+then grep "pengu_software_version" /.singularity.d/env/* | awk '{print $2}' | sed 's/pengu_software_version_//g' > /etc/pengu_software_version.txt ; \
+fi
 

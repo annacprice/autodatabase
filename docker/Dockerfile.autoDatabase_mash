@@ -1,10 +1,18 @@
-FROM ubuntu:16.04
+FROM debian:buster
 
-RUN apt-get update && apt-get install -y gcc wget \ 
-&& wget 'https://github.com/marbl/Mash/releases/download/v2.1.1/mash-Linux64-v2.1.1.tar' \
+ENV pengu_software_version_mash=2.1.1
+
+RUN apt-get update && apt-get install -y gcc wget \
+&& wget https://github.com/marbl/Mash/releases/download/v${pengu_software_version_mash}/mash-Linux64-v${pengu_software_version_mash}.tar \
 && tar -xf mash-Linux64-v2.1.1.tar \
 && mv mash-Linux64-v2.1.1/mash /usr/local/bin \
 && rm -r mash-Linux*
 
-CMD ["/bin/bash"]
+### Software Versions ###
+
+RUN env | grep "pengu_software_version" | sed 's/pengu_software_version_//g' > /etc/pengu_software_version.txt
+
+RUN if [ -d "/.singularity.d/env" ] ; \
+then grep "pengu_software_version" /.singularity.d/env/* | awk '{print $2}' | sed 's/pengu_software_version_//g' > /etc/pengu_software_version.txt ; \
+fi
 
