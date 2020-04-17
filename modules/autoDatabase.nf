@@ -8,6 +8,8 @@ process autoDatabase_addTaxon {
    
     publishDir "${params.newDatabase}/${task.process.replaceAll(":", "_")}", pattern: '*.f*', mode: 'copy'
 
+    container "${params.simgdir}/autoDatabase_pythonenv.simg"
+
     input:
     tuple val(speciesname), path(fasta)
 
@@ -29,6 +31,8 @@ process autoDatabase_mash {
     */
     
     publishDir "${params.newDatabase}/${task.process.replaceAll(":", "_")}", pattern: '*_mashdist.txt', mode: 'copy'
+
+    container "${params.simgdir}/autoDatabase_mash.simg"
 
     input:
     tuple val(taxid), path(fasta)
@@ -52,6 +56,8 @@ process autoDatabase_qc {
     */
 
     publishDir "${params.newDatabase}/${task.process.replaceAll(":", "_")}", pattern: '*.txt', mode: 'copy'
+
+    container "${params.simgdir}/autoDatabase_pythonenv.simg"
 
     input:
     path(mashdist)
@@ -111,6 +117,8 @@ process autoDatabase_kraken2Build {
     */
 
     publishDir "${params.newDatabase}/${task.process.replaceAll(":", "_")}", pattern: '*.k2d', mode: 'copy'
+
+    container "${params.simgdir}/autoDatabase_kraken2.simg"
 
     cpus 4
 
