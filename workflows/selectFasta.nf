@@ -14,7 +14,7 @@ workflow selectFasta {
     main:
       autoDatabase_mash(AllFasta)
       autoDatabase_qc(autoDatabase_mash.out)
-      autoDatabase_selectFasta(AllFasta, autoDatabase_qc.out.collect().flatten().map{ file -> tuple(file.getName().split("_")[0], file) }.groupTuple(sort: true))
+      autoDatabase_selectFasta(autoDatabase_qc.out.join(AllFasta, by: 0))
     emit:
       FastaToAdd = autoDatabase_selectFasta.out
 }

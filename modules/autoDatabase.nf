@@ -35,10 +35,10 @@ process autoDatabase_mash {
     container "${params.simgdir}/autoDatabase_mash.simg"
 
     input:
-    tuple val(taxid), path(fasta)
+    tuple val(taxid), path(taxfiles)
 
     output:
-    path("*_mashdist.txt")
+    tuple val(taxid), path("*_mashdist.txt")
 
     script:
     """
@@ -60,10 +60,10 @@ process autoDatabase_qc {
     container "${params.simgdir}/autoDatabase_pythonenv.simg"
 
     input:
-    path(mashdist)
+    tuple val(taxid), path(mashdist)
 
     output:
-    path("*.txt")
+    tuple val(taxid), path("*.txt")
 
     script:
     """
@@ -84,20 +84,16 @@ process autoDatabase_selectFasta {
     echo true
 
     input:
-    tuple val(taxid), path(fasta)
-    tuple val(taxid), path(txt)
+    tuple val(taxid), path(txt), path(fasta)
     
     output:
     path "assemblies/*.f*" optional true
    
     script:
     """
-    ls *.txt | xargs echo
-    ls *.f* | xargs echo
-
     mkdir assemblies
 
-    cat *.txt > clean.txt
+    cat *_clean.txt > clean.txt
 
     for x in *.f*; do
     if grep -Fxq \$x clean.txt
@@ -120,7 +116,7 @@ process autoDatabase_kraken2Build {
 
     container "${params.simgdir}/autoDatabase_kraken2.simg"
 
-    cpus 4
+    cpus 24
 
     input:
     path(fasta)
@@ -135,7 +131,7 @@ process autoDatabase_kraken2Build {
     mkdir taxonomy
     mv names.dmp nodes.dmp taxonomy
 
-    for file in *.fasta; do
+    for file in **.f*; do
        kraken2-build --add-to-library \$file --db .
     done
 
