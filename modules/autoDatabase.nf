@@ -74,9 +74,9 @@ process autoDatabase_qc {
 process autoDatabase_selectFasta {
     /**
     * Creates a channel containing the high quality assemblies
-    * @input tuple val(taxid), path(fasta) path(txt), path(fasta) 
+    * @input tuple val(taxid), path(fasta) path(txt)
     * @output path("assemblies/*.f*")
-    * @operator .map{ file -> tuple(file.getName().split("_")[0], file) }.groupTuple(sort: true)
+    * @operator .map{ file -> tuple(file.getName().split("_")[0], file) }.groupTuple(sort: true).join(AllFasta, by: 0)
     */
 
     publishDir "${params.newDatabase}/${task.process.replaceAll(":", "_")}", pattern: 'assemblies/*.f*', mode: 'copy'
