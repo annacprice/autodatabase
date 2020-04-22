@@ -26,7 +26,7 @@ process autoDatabase_mash {
     /**
     * Creates mash distance file for each taxon
     * @input tuple val(taxid), path(fasta)
-    * @output path("${taxid}_mashdist.txt")
+    * @output tuple val(taxid), path("${taxid}_mashdist.txt")
     * @operator .map{ file -> tuple(file.getName().split("_")[0], file) }.groupTuple(sort: true)
     */
     
@@ -38,7 +38,7 @@ process autoDatabase_mash {
     tuple val(taxid), path(taxfiles)
 
     output:
-    tuple val(taxid), path("*_mashdist.txt")
+    tuple val(taxid), path("${taxid}_mashdist.txt")
 
     script:
     """
@@ -50,8 +50,8 @@ process autoDatabase_mash {
 process autoDatabase_qc {
     /**
     * Builds a mash distance matrix for each taxon, which is used to output txt file of high quality assemblies
-    * @input path(mashdist)
-    * @output path("$taxid_mashdist.txt")
+    * @input tuple val(taxid), path(mashdist)
+    * @output tuple val(taxid), path("*.txt")
     * @operator .map{ file -> tuple(file.getName().split("_")[0], file) }.groupTuple(sort: true)
     */
 
@@ -74,9 +74,9 @@ process autoDatabase_qc {
 process autoDatabase_selectFasta {
     /**
     * Creates a channel containing the high quality assemblies
-    * @input tuple val(taxid), path(fasta); tuple val(taxid), path(fasta) 
+    * @input tuple val(taxid), path(fasta) path(txt), path(fasta) 
     * @output path("assemblies/*.f*")
-    * @operator .collect().flatten().map{ file -> tuple(file.getName().split("_")[0], file) }.groupTuple(sort: true)
+    * @operator .map{ file -> tuple(file.getName().split("_")[0], file) }.groupTuple(sort: true)
     */
 
     publishDir "${params.newDatabase}/${task.process.replaceAll(":", "_")}", pattern: 'assemblies/*.f*', mode: 'copy'
@@ -93,10 +93,8 @@ process autoDatabase_selectFasta {
     """
     mkdir assemblies
 
-    cat *_clean.txt > clean.txt
-
     for x in *.f*; do
-    if grep -Fxq \$x clean.txt
+    if grep -Fxq \$x ${taxid}_clean.txt
     then
         mv \$x assemblies/   
     fi
