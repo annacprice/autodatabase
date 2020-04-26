@@ -2,7 +2,7 @@ Bootstrap: docker
 From: debian:buster
 %post
 
-pengu_software_version_kraken2=2.0.8
+pengu_software_version_kraken2=2.0.9
 
 apt-get update && apt-get install -y gcc g++ wget build-essential rsync unzip ncbi-blast+ \
 && wget https://github.com/DerrickWood/kraken2/archive/v${pengu_software_version_kraken2}-beta.tar.gz \
@@ -20,7 +20,7 @@ then grep "pengu_software_version" /.singularity.d/env/* | awk '{print $2}' | se
 fi
 
 %environment
-export pengu_software_version_kraken2=2.0.8
+export pengu_software_version_kraken2=2.0.9
 %runscript
 exec /bin/bash "$@"
 %startscript

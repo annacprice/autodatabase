@@ -1,6 +1,6 @@
 FROM debian:buster
 
-ENV pengu_software_version_kraken2=2.0.8
+ENV pengu_software_version_kraken2=2.0.9
 
 RUN apt-get update && apt-get install -y gcc g++ wget build-essential rsync unzip ncbi-blast+ \
 && wget https://github.com/DerrickWood/kraken2/archive/v${pengu_software_version_kraken2}-beta.tar.gz \
