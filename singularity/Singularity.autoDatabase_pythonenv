@@ -1,8 +1,5 @@
 Bootstrap: docker
 From: debian:buster
-%files
-taxadd usr/local/bin/
-fastaselect usr/local/bin/
 %post
 
 
