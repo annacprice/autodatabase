@@ -27,12 +27,27 @@ def buildMatrix(inMash):
     sumArray = mashMatrix.sum(axis=1)
     avArray = sumArray/numFastas
     
-    # if there are less than four samples in taxon then wrie error file then exit
-    if len(avArray) < 4:
-        taxon2small = str(tax[0]) + "_error.txt"
+    # get filenames and append to average distances
+    filenames = iniArray[0:int(numFastas), 0]
+    fileMash = np.column_stack((filenames, mashMatrix, avArray))
+    fileavArray = np.column_stack((filenames, avArray))
+
+    # save mash matrix with average distance appended on the end
+    mashList = str(tax[0]) + "_mash.txt"
+    np.savetxt(mashList, fileMash, delimiter=" ", fmt="%s")
+
+    # if there are less than three samples in taxon then skip quality control
+    if len(avArray) < 3:
+        taxon2small = str(tax[0]) + "_warning.txt"
         with open(taxon2small, "w") as file_out:
-            file_out.write("Taxon needs at least 4 samples to be added to database.")
+            file_out.write("Warning: Taxon has less than 3 samples. Samples have been added to database without quality control.")
+        cleanList = str(tax[0]) + "_clean.txt"
+        with open(cleanList, "w") as file_out:
+            for elem in filenames:
+                file_out.write("%s\n" % elem)
         exit()
+
+    # add stage to remove duplicate files here
 
     # round avArray to 2 s.f
     rdArray =[]
@@ -40,20 +55,9 @@ def buildMatrix(inMash):
         elemrd = round(elem, -int(np.floor(np.sign(elem) * np.log10(abs(elem)))) + 2)
         rdArray.append(elemrd)
 
-    q1 = np.percentile(avArray, 25)
-    q3 = np.percentile(avArray, 75)
-    IQR = q3 - q1
-   
+    # find the mode
     modeArray = mode(rdArray)
     modeVal = modeArray[0]
-
-    # find filenames and append to average distance
-    filenames = iniArray[0:int(numFastas), 0]
-    fileArray = np.column_stack((filenames, mashMatrix, avArray))
-    fileavArray = np.column_stack((filenames, avArray))
-   
-    mashList = str(tax[0]) + "_mash.txt"
-    np.savetxt(mashList, fileArray, delimiter=" ", fmt="%s")
 
     return fileavArray, tax, modeVal
 
@@ -73,7 +77,7 @@ def fastaMove(fileavArray, tax, modeVal):
         for elem in np.nditer(cleanIndices):
             cleanFasta.append(fileavArray[elem, 0])
 
-    # write to file
+    # write to file list of high quality assemblies
     cleanList = str(tax[0]) + "_clean.txt"
     with open(cleanList, "w") as file_out:
         for elem in cleanFasta:
