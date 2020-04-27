@@ -71,7 +71,7 @@ process autoDatabase_qc {
     """
 }
 
-process autoDatabase_selectFasta {
+process autoDatabase_cleanFasta {
     /**
     * Creates a channel containing the high quality assemblies
     * @input tuple val(taxid), path(fasta) path(txt)
