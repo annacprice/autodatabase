@@ -47,8 +47,9 @@ def buildMatrix(inMash):
                 file_out.write("%s\n" % elem)
         exit()
 
-    # add stage to remove duplicate files here
-
+    # remove duplicate files
+    calcArray = fileavArray[np.unique(fileavArray[:, 1], return_index=True)[1]]
+  
     # round avArray to 2 s.f
     rdArray =[]
     for elem in avArray:
@@ -59,9 +60,9 @@ def buildMatrix(inMash):
     modeArray = mode(rdArray)
     modeVal = modeArray[0]
 
-    return fileavArray, tax, modeVal
+    return calcArray, tax, modeVal
 
-def fastaMove(fileavArray, tax, modeVal):
+def fastaMove(calcArray, tax, modeVal):
 
     # get 10% range around the mode
     tenpercent = 0.1 * modeVal
@@ -69,13 +70,13 @@ def fastaMove(fileavArray, tax, modeVal):
     high = modeVal + tenpercent
     
     # collect clean fastas
-    cleanIndices = np.argwhere((fileavArray[:,1] >= low) & (fileavArray[:,1] <= high))
+    cleanIndices = np.argwhere((calcArray[:,1] >= low) & (calcArray[:,1] <= high))
    
     cleanFasta = []
     # if cleanIndices is not empty
     if cleanIndices.size:
         for elem in np.nditer(cleanIndices):
-            cleanFasta.append(fileavArray[elem, 0])
+            cleanFasta.append(calcArray[elem, 0])
 
     # write to file list of high quality assemblies
     cleanList = str(tax[0]) + "_clean.txt"
@@ -92,5 +93,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
     inMash = args.inMash
 
-    fileavArray, tax, modeVal = buildMatrix(inMash)
-    fastaMove(fileavArray, tax, modeVal)
+    calcArray, tax, modeVal = buildMatrix(inMash)
+    fastaMove(calcArray, tax, modeVal)
