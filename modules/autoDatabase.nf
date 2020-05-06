@@ -6,7 +6,7 @@ process autoDatabase_addTaxon {
     * @operator none
     */
    
-    publishDir "${params.newDatabase}/${task.process.replaceAll(":", "_")}", pattern: '*.f*', mode: 'copy'
+    //publishDir "${params.newDatabase}/${task.process.replaceAll(":", "_")}", pattern: '*.f*', mode: 'copy'
 
     container "${params.simgdir}/autoDatabase_pythonenv.simg"
 
@@ -104,7 +104,7 @@ process autoDatabase_cleanFasta {
 
 process autoDatabase_kraken2Build {
     /**
-    * Builds a kraken2 database using the october 2018 taxonomy
+    * Builds a kraken2 database using the january 2018 taxonomy
     * @input path(fasta)
     * @output path("*.k2d")
     * @operator .collect()
@@ -124,8 +124,8 @@ process autoDatabase_kraken2Build {
 
     script:
     """
-    wget ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump_archive/taxdmp_2018-10-01.zip
-    unzip taxdmp_2018-10-01.zip
+    wget ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump_archive/taxdmp_2018-01-01.zip
+    unzip taxdmp_2018-01-01.zip
     mkdir taxonomy
     mv names.dmp nodes.dmp taxonomy
 

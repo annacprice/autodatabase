@@ -8,10 +8,10 @@ apt-get update \
 && apt-get install -y wget unzip \
 && pip3 install --upgrade pip \
 && pip3 --no-cache-dir install requests scipy numpy pandas \
-&& wget ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump_archive/taxdmp_2018-10-01.zip \
-&& unzip taxdmp_2018-10-01.zip \
+&& wget ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump_archive/taxdmp_2018-01-01.zip \
+&& unzip taxdmp_2018-01-01.zip \
 && mv names.dmp /home \
-&& rm taxdmp_2018-10-01.zip *.dmp *.prt
+&& rm taxdmp_2018-01-01.zip *.dmp *.prt
 
 ### Software Versions ###
 
