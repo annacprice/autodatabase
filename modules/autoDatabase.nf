@@ -104,7 +104,7 @@ process autoDatabase_cleanFasta {
 
 process autoDatabase_kraken2Build {
     /**
-    * Builds a kraken2 database using the january 2018 taxonomy
+    * Builds a kraken2 database using the may 2020 taxonomy
     * @input path(fasta)
     * @output path("*.k2d")
     * @operator .collect()
@@ -124,8 +124,14 @@ process autoDatabase_kraken2Build {
 
     script:
     """
-    wget ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump_archive/taxdmp_2018-01-01.zip
-    unzip taxdmp_2018-01-01.zip
+    wget ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump_archive/taxdmp_2020-05-01.zip
+    unzip taxdmp_2020-05-01.zip
+
+    largestTax=`sort -t't' -k1nr names.dmp | head -1 | cut -f1`
+    tomidaeTax=\$((largestTax+1))
+    echo -e "\$tomidaeTax\t|\tMycobacterium tomidae\t|\t\t|\tscientific name\t|" >> names.dmp
+    echo -e "\$tomidaeTax\t|\t120793\t|\tspecies\t|\t\t|\t11\t|\t1\t|\t1\t|\t1\t|\t1\t|\t1\t|\t1\t|\t1\t|" >> nodes.dmp
+
     mkdir taxonomy
     mv names.dmp nodes.dmp taxonomy
 
@@ -135,4 +141,4 @@ process autoDatabase_kraken2Build {
 
     kraken2-build --build --threads ${task.cpus} --db .
     """
-}  
+}
