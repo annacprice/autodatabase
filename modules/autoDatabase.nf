@@ -8,8 +8,6 @@ process autoDatabase_addTaxon {
    
     //publishDir "${params.newDatabase}/${task.process.replaceAll(":", "_")}", pattern: '*.f*', mode: 'copy'
 
-    container "${params.simgdir}/autoDatabase_pythonenv.sif"
-
     input:
     tuple val(speciesname), path(fasta)
 
@@ -31,8 +29,6 @@ process autoDatabase_mash {
     */
     
     publishDir "${params.newDatabase}/${task.process.replaceAll(":", "_")}", pattern: '*_mashdist.txt', mode: 'copy'
-
-    container "${params.simgdir}/autoDatabase_mash.sif"
 
     input:
     tuple val(taxid), path(taxfiles)
@@ -56,8 +52,6 @@ process autoDatabase_qc {
     */
 
     publishDir "${params.newDatabase}/${task.process.replaceAll(":", "_")}", pattern: '*.txt', mode: 'copy'
-
-    container "${params.simgdir}/autoDatabase_pythonenv.sif"
 
     input:
     tuple val(taxid), path(mashdist)
@@ -112,8 +106,6 @@ process autoDatabase_kraken2Build {
 
     publishDir "${params.newDatabase}/${task.process.replaceAll(":", "_")}", pattern: '*.k2d', mode: 'copy'
 
-    container "${params.simgdir}/autoDatabase_kraken2.sif"
-
     cpus 24
 
     input:
@@ -136,7 +128,7 @@ process autoDatabase_kraken2Build {
     mv names.dmp nodes.dmp taxonomy
 
     for file in **.f*; do
-       kraken2-build --add-to-library \$file --db .
+        kraken2-build --add-to-library \$file --db .
     done
 
     kraken2-build --build --threads ${task.cpus} --db .
