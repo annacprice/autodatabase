@@ -13,9 +13,9 @@ workflow {
     // New Assemblies to Edit
     EditFasta = Channel.fromPath( params.addFasta + "/**.f*" ).map { file -> tuple(file.getParent().getName(), file)}
 
-    if( params.currentDatabase ) {
+    if( params.previousDatabase ) {
         // If building from a previous database, create channnel for the assemblies
-        OldFasta = Channel.fromPath( params.currentDatabase + "/**.f*" ) 
+        OldFasta = Channel.fromPath( params.previousDatabase + "/**.f*" ) 
     }
     else {
         // Else there are no assemblies to add so create empty channel
