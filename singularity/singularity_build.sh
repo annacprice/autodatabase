@@ -1,6 +1,6 @@
 #!/bin/bash
 
-container_list=("kraken2" "mash" "pythonenv")
+container_list=("kraken2" "mash" "pythonenv" "krona")
 software_tag="autoDatabase"
 
 for item in ${container_list[@]}; do

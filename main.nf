@@ -11,7 +11,7 @@ include {krakenBuild} from './workflows/krakenBuild.nf'
 // main workflow
 workflow {
     // New Assemblies to Edit
-    EditFasta = Channel.fromPath( params.addFasta + "/**.f*" ).map { file -> tuple(file.getParent().getName(), file)}
+    EditFasta = Channel.fromPath( params.addFasta + "/**.f*" ).map{ file -> tuple(file.getParent().getName(), file) }
 
     if( params.previousDatabase ) {
         // If building from a previous database, create channnel for the assemblies

@@ -88,10 +88,10 @@ process autoDatabase_cleanFasta {
     mkdir assemblies
 
     for x in *.f*; do
-    if grep -Fxq \$x ${taxid}_clean.txt
-    then
-        mv \$x assemblies/   
-    fi
+        if grep -Fxq \$x ${taxid}_clean.txt
+        then
+            mv \$x assemblies/   
+        fi
     done    
     """
 }
@@ -100,11 +100,12 @@ process autoDatabase_kraken2Build {
     /**
     * Builds a kraken2 database using the may 2020 taxonomy
     * @input path(fasta)
-    * @output path("*.k2d")
+    * @output path("*.k2d") path("database.txt")
     * @operator .collect()
     */
 
     publishDir "${params.newDatabase}/${task.process.replaceAll(":", "_")}", pattern: '*.k2d', mode: 'copy'
+    publishDir "${params.newDatabase}/${task.process.replaceAll(":", "_")}", pattern: 'database.txt', mode: 'copy'
 
     cpus 24
 
@@ -112,7 +113,8 @@ process autoDatabase_kraken2Build {
     path(fasta)
 
     output:
-    path("*.k2d")
+    path("*.k2d", emit: kraken2_database)
+    path("database.txt", emit: database_txt)
 
     script:
     """
@@ -132,5 +134,28 @@ process autoDatabase_kraken2Build {
     done
 
     kraken2-build --build --threads ${task.cpus} --db .
+    kraken2-inspect --db . > database.txt
+    """
+}
+
+process autoDatabase_krona {
+    /**
+    * Creates a krona chart showing the composition of the built kraken2 database
+    * @input path(databasetxt)
+    * @output path("database.html")
+    * @operator none
+    */
+
+    publishDir "${params.newDatabase}/${task.process.replaceAll(":", "_")}", pattern: 'database.html', mode: 'copy'
+
+    input:
+    path(databasetxt)
+    
+    output:
+    path("database.html", emit: database_html)
+
+    script:
+    """
+    ktImportTaxonomy -m 3 -t 5 "${databasetxt}" -o database.html
     """
 }
