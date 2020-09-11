@@ -6,8 +6,9 @@ There are five stages to the workflow:
 1) Adding the taxonomic ID to the sequence IDs and the filenames (autoDatabase_addTaxon)
 2) Creating a mash matrix for each taxon (autoDatabase_mash)
 3) Using the mash matrix to select high quality assemblies (autoDatabase_qc)
-4) Create a channel containing the high quality assemblies (autoDatabase_cleanFasta)
+4) Creating a channel containing the high quality assemblies (autoDatabase_cleanFasta)
 5) Building the Kraken2 database (autoDatabase_kraken2Build)
+6) Creating a Krona chart showing the composition of the Kraken2 database (autoDatabase_krona) 
 
 The expected input for autodatabase are fasta files. They should sorted into directories for each taxon 
 where the directory name is the taxon name with spaces replaced with underscores. E.g.
