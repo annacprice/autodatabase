@@ -2,7 +2,7 @@
 Automated build of a Kraken2 database using Nextflow DSL2. Requires Nextflow version>= 20.01.0 and either Docker or Singularity.
 
 ## Quick Start ##
-There are five stages to the workflow:
+There are six stages to the workflow:
 1) Adding the taxonomic ID to the sequence IDs and the filenames (autoDatabase_addTaxon)
 2) Creating a mash matrix for each taxon (autoDatabase_mash)
 3) Using the mash matrix to select high quality assemblies (autoDatabase_qc)
