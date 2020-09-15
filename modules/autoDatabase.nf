@@ -84,7 +84,7 @@ process autoDatabase_qc {
 
     script:
     """
-    fastaselect -i "${mashdist}"
+    fastaselect -i "${mashdist}" -r "${params.modeRange}"
     """
 }
 

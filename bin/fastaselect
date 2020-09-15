@@ -62,12 +62,12 @@ def buildMatrix(inMash):
 
     return calcArray, tax, modeVal
 
-def fastaMove(calcArray, tax, modeVal):
+def fastaMove(calcArray, tax, modeVal, modeRange):
 
-    # get 10% range around the mode
-    tenpercent = 0.1 * modeVal
-    low = modeVal - tenpercent
-    high = modeVal + tenpercent
+    # get range around the mode
+    percentRange = float(modeRange) * modeVal
+    low = modeVal - percentRange
+    high = modeVal + percentRange
     
     # collect clean fastas
     cleanIndices = np.argwhere((calcArray[:,1] >= low) & (calcArray[:,1] <= high))
@@ -89,9 +89,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input-mash", dest="inMash", required=True,
                         help="Path to the input mash results")
+    parser.add_argument("-r", "--mode-range", dest="modeRange", required=True,
+                        help="Range around the mash distance mode")
     
     args = parser.parse_args()
     inMash = args.inMash
+    modeRange = args.modeRange
 
     calcArray, tax, modeVal = buildMatrix(inMash)
-    fastaMove(calcArray, tax, modeVal)
+    fastaMove(calcArray, tax, modeVal, modeRange)
