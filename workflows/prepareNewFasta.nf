@@ -16,5 +16,5 @@ workflow prepareNewFasta {
     emit:
       TaxonomyNames = autoDatabase_getTaxonomy.out.ncbi_names
       TaxonomyNodes = autoDatabase_getTaxonomy.out.ncbi_nodes
-      NewFasta = autoDatabase_addTaxon.out
+      NewFasta = autoDatabase_addTaxon.out.tax_fasta
 }

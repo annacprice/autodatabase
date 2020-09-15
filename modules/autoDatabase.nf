@@ -2,7 +2,7 @@ process autoDatabase_getTaxonomy {
     /**
     * Download the NCBI taxonomy, identified using params.ncbiDate
     * @input none
-    * @output tuple path("names.dmp"), path("nodes.dmp")
+    * @output path("names.dmp"), path("nodes.dmp")
     * @operator none
     */
 
@@ -24,9 +24,9 @@ process autoDatabase_getTaxonomy {
 process autoDatabase_addTaxon {
     /**
     * Uses species name to find the tax ID and adds it to the contig headers and filename
-    * @input tuple val(speciesname), path(fasta)
+    * @input tuple val(speciesname), path(fasta), path(names)
     * @output path("*.f*")
-    * @operator none
+    * @operator .map{ file -> tuple(file.getParent().getName(), file).combine("names.dmp")
     */
    
     //publishDir "${params.newDatabase}/${task.process.replaceAll(":", "_")}", pattern: '*.f*', mode: 'copy'
@@ -35,7 +35,7 @@ process autoDatabase_addTaxon {
     tuple val(speciesname), path(fasta), path(names)
 
     output:
-    path("*.f*")
+    path("*.f*", emit: tax_fasta)
 
     script:
     """
@@ -57,7 +57,7 @@ process autoDatabase_mash {
     tuple val(taxid), path(taxfiles)
 
     output:
-    tuple val(taxid), path("${taxid}_mashdist.txt")
+    tuple val(taxid), path("${taxid}_mashdist.txt"), emit: mash_dist
 
     script:
     """
@@ -70,7 +70,7 @@ process autoDatabase_qc {
     /**
     * Builds a mash distance matrix for each taxon, which is used to output txt file of high quality assemblies
     * @input tuple val(taxid), path(mashdist)
-    * @output tuple val(taxid), path("*.txt")
+    * @output tuple val(taxid), path("${taxid}_clean.txt")
     * @operator .map{ file -> tuple(file.getName().split("_")[0], file) }.groupTuple(sort: true)
     */
 
@@ -80,7 +80,7 @@ process autoDatabase_qc {
     tuple val(taxid), path(mashdist)
 
     output:
-    tuple val(taxid), path("*.txt")
+    tuple val(taxid), path("${taxid}_clean.txt"), emit: quality_list
 
     script:
     """
@@ -98,13 +98,11 @@ process autoDatabase_cleanFasta {
 
     publishDir "${params.newDatabase}/${task.process.replaceAll(":", "_")}", pattern: 'assemblies/*.f*', mode: 'copy'
 
-    echo true
-
     input:
     tuple val(taxid), path(txt), path(fasta)
     
     output:
-    path "assemblies/*.f*" optional true
+    path "assemblies/*.f*", emit: database_fasta optional true
    
     script:
     """

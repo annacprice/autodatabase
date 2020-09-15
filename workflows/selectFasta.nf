@@ -13,8 +13,8 @@ workflow selectFasta {
       AllFasta
     main:
       autoDatabase_mash(AllFasta)
-      autoDatabase_qc(autoDatabase_mash.out)
-      autoDatabase_cleanFasta(autoDatabase_qc.out.join(AllFasta, by: 0))
+      autoDatabase_qc(autoDatabase_mash.out.mash_dist)
+      autoDatabase_cleanFasta(autoDatabase_qc.out.quality_list.join(AllFasta, by: 0))
     emit:
-      FastaToAdd = autoDatabase_cleanFasta.out
+      FastaToAdd = autoDatabase_cleanFasta.out.database_fasta
 }
