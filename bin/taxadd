@@ -32,7 +32,7 @@ def get_taxid_names(taxname):
     taxname = taxname.replace("_", " ")
 
     # read names.dmp into dataframe
-    df = pd.read_csv('/home/names.dmp', header=None, sep="|")
+    df = pd.read_csv('names.dmp', header=None, sep="|")
     # strip leading and trailing whitespace from column 2
     df[1] = df[1].str.strip()
 

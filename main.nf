@@ -26,6 +26,6 @@ workflow {
        prepareNewFasta(EditFasta)
        AllFasta = prepareNewFasta.out.NewFasta.mix(OldFasta).map{ file -> tuple(file.getName().split("_")[0], file) }.groupTuple(sort: true)
        selectFasta(AllFasta)
-       krakenBuild(selectFasta.out.FastaToAdd)  
+       krakenBuild(selectFasta.out.FastaToAdd, prepareNewFasta.out.TaxonomyNames, prepareNewFasta.out.TaxonomyNodes)  
 }
 

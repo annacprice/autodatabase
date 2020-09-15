@@ -1,3 +1,26 @@
+process autoDatabase_getTaxonomy {
+    /**
+    * Download the NCBI taxonomy, identified using params.ncbiDate
+    * @input none
+    * @output tuple path("names.dmp"), path("nodes.dmp")
+    * @operator none
+    */
+
+    output:
+    path("names.dmp", emit: ncbi_names)
+    path("nodes.dmp", emit: ncbi_nodes)
+
+    script:
+    """
+    wget ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump_archive/taxdmp_${params.ncbiDate}.zip
+    unzip taxdmp_${params.ncbiDate}.zip
+    largestTax=`sort -t't' -k1nr names.dmp | head -1 | cut -f1`
+    tomidaeTax=\$((largestTax+1))
+    echo -e "\$tomidaeTax\t|\tMycobacterium tomidae\t|\t\t|\tscientific name\t|" >> names.dmp
+    echo -e "\$tomidaeTax\t|\t120793\t|\tspecies\t|\t\t|\t11\t|\t1\t|\t1\t|\t1\t|\t1\t|\t1\t|\t1\t|\t1\t|" >> nodes.dmp
+    """
+}
+
 process autoDatabase_addTaxon {
     /**
     * Uses species name to find the tax ID and adds it to the contig headers and filename
@@ -9,7 +32,7 @@ process autoDatabase_addTaxon {
     //publishDir "${params.newDatabase}/${task.process.replaceAll(":", "_")}", pattern: '*.f*', mode: 'copy'
 
     input:
-    tuple val(speciesname), path(fasta)
+    tuple val(speciesname), path(fasta), path(names)
 
     output:
     path("*.f*")
@@ -111,6 +134,8 @@ process autoDatabase_kraken2Build {
 
     input:
     path(fasta)
+    path(names)
+    path(nodes)
 
     output:
     path("*.k2d", emit: kraken2_database)
@@ -118,14 +143,6 @@ process autoDatabase_kraken2Build {
 
     script:
     """
-    wget ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump_archive/taxdmp_2020-05-01.zip
-    unzip taxdmp_2020-05-01.zip
-
-    largestTax=`sort -t't' -k1nr names.dmp | head -1 | cut -f1`
-    tomidaeTax=\$((largestTax+1))
-    echo -e "\$tomidaeTax\t|\tMycobacterium tomidae\t|\t\t|\tscientific name\t|" >> names.dmp
-    echo -e "\$tomidaeTax\t|\t120793\t|\tspecies\t|\t\t|\t11\t|\t1\t|\t1\t|\t1\t|\t1\t|\t1\t|\t1\t|\t1\t|" >> nodes.dmp
-
     mkdir taxonomy
     mv names.dmp nodes.dmp taxonomy
 

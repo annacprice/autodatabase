@@ -10,10 +10,13 @@ include {autoDatabase_krona} from '../modules/autoDatabase.nf' params(params)
 workflow krakenBuild {
     take:
       FastaToAdd
+      TaxonomyNames
+      TaxonomyNodes
     main:
-      autoDatabase_kraken2Build(FastaToAdd.collect())
+      autoDatabase_kraken2Build(FastaToAdd.collect(), TaxonomyNames.collect(), TaxonomyNodes.collect())
       autoDatabase_krona(autoDatabase_kraken2Build.out.database_txt)
     emit:
       KrakenDatabase = autoDatabase_kraken2Build.out.kraken2_database
-      KronaChart = autoDatabase_kraken2Build.out.database_txt
+      KrakenTxt = autoDatabase_kraken2Build.out.database_txt
+      KronaReport = autoDatabase_krona.out.database_html
 }
